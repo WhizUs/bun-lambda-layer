@@ -31,5 +31,6 @@ jobs:
         run: |
           export PATH=~/.bun/bin:$PATH
           cd bun/packages/bun-lambda
+          bun install
           bun run build-layer
           ls -al
