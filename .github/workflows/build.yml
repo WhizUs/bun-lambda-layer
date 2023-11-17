@@ -7,7 +7,7 @@ on:
 
 jobs:
   print-version:
-    runs-on: ubuntu-latest
+    runs-on: oven/bun
 
     steps:
       - name: Checkout code
@@ -21,7 +21,7 @@ jobs:
       - name: Clone bun
         run: |
           # Clone the external repository with the specified tag
-          TAG_NAME="bun-$VERSION"
+          TAG_NAME="bun-v$VERSION"
           echo "Tag name: $TAG_NAME"
           git clone -b $TAG_NAME --depth 1 https://github.com/oven-sh/bun.git ./bun
           
