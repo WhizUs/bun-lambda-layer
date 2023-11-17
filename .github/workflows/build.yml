@@ -21,12 +21,12 @@ jobs:
       - name: Install bun
         run: |
           curl -fsSL https://bun.sh/install | bash -s -- bun-v$VERSION
+          source /home/runner/.bashrc
 
       - name: Clone bun
         run: git clone -b bun-v$VERSION --depth 1 https://github.com/oven-sh/bun.git ./bun
 
       - name: Build layer
         run: |
-          curl -fsSL https://bun.sh/install | bash -s -- bun-v$VERSION
           cd bun/packages/bun-lambda
           bun install
