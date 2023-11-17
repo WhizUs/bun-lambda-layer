@@ -8,11 +8,7 @@ on:
       - 'version.yml'
 
 jobs:
-<<<<<<< Updated upstream
-  print-version:
-=======
   build-bun-lambda-layer:
->>>>>>> Stashed changes
     runs-on: ubuntu-latest
 
     steps:
