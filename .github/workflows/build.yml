@@ -27,5 +27,6 @@ jobs:
 
       - name: Build layer
         run: |
+          curl -fsSL https://bun.sh/install | bash -s -- bun-v$VERSION
           cd bun/packages/bun-lambda
           bun install
