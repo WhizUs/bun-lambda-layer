@@ -29,9 +29,7 @@ jobs:
 
       - name: Build layer
         run: |
-          echo $PATH
           export PATH=~/.bun/bin:$PATH
-          echo "WAZZUP"
-          echo $PATH
           cd bun/packages/bun-lambda
-          ~/.bun/bin/bun install
+          bun run build-layer
+          ls -al
