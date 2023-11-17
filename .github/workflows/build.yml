@@ -1,11 +1,11 @@
-name: Print Version
+name: Build Bun Lambda Layer
 
 on:
   push:
     branches:
-      - feat/pipeline
-    #paths:
-    #  - 'version.yml'
+      - main
+    paths:
+      - 'version.yml'
 
 jobs:
   print-version:
