@@ -13,10 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Read and print version
+      - name: Read bun version
+        run: VERSION=$(grep 'version:' version.yml | awk '{print $2}')
+
+      - name: Clone bun
         run: |
-          # Read the version from the YAML file
-          VERSION=$(grep 'version:' version.yml | awk '{print $2}')
+          # Clone the external repository with the specified tag
+          git clone -b bun-$VERSION --depth 1 git@github.com:oven-sh/bun.git ./bun
           
-          # Print the version
-          echo "Version: $VERSION"
+          # Navigate to the cloned repository
+          cd bun
+          
+          pwd
