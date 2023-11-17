@@ -1,0 +1,22 @@
+name: Print Version
+
+on:
+  push:
+    branches:
+      - feat/pipeline
+
+jobs:
+  print-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Read and print version
+        run: |
+          # Read the version from the YAML file
+          VERSION=$(grep 'version:' version.yml | awk '{print $2}')
+          
+          # Print the version
+          echo "Version: $VERSION"
