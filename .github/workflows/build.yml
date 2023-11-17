@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - feat/pipeline
+    paths:
+      - 'version.yml'
 
 jobs:
   print-version:
@@ -37,4 +39,5 @@ jobs:
 
       - name: Create release
         run: gh release create "v$VERSION" bun/packages/bun-lambda/bun-lambda-layer-$VERSION --title "Release $VERSION" --notes "Lambda layer using bun-v$VERSION"
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
