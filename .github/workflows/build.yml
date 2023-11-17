@@ -7,7 +7,7 @@ on:
 
 jobs:
   print-version:
-    runs-on: oven/bun
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -18,14 +18,14 @@ jobs:
           VERSION=$(grep 'version:' version.yml | awk '{print $2}')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Clone bun
+      - name: Install bun
         run: |
-          # Clone the external repository with the specified tag
-          TAG_NAME="bun-v$VERSION"
-          echo "Tag name: $TAG_NAME"
-          git clone -b $TAG_NAME --depth 1 https://github.com/oven-sh/bun.git ./bun
-          
-          # Navigate to the cloned repository
-          cd bun
-          
-          pwd
+          curl -fsSL https://bun.sh/install | bash -s -- bun-v$VERSION
+
+      - name: Clone bun
+        run: git clone -b bun-v$VERSION --depth 1 https://github.com/oven-sh/bun.git ./bun
+
+      - name: Build layer
+        run: |
+          cd bun/packages/bun-lambda
+          bun install
