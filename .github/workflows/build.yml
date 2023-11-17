@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - feat/pipeline
-    paths:
-      - 'version.yml'
+    #paths:
+    #  - 'version.yml'
 
 jobs:
   print-version:
