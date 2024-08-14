@@ -1,0 +1,35 @@
+name: Build Bun Lambda Layer
+
+on:
+  schedule:
+    - cron: "30 8,20 * * *"
+
+jobs:
+  build-bun-lambda-layer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get Latest Bun Release
+        id: bun_latest_version
+        uses: abatilo/release-info-action@v1.3.3
+        with:
+          owner: oven-sh
+          repo: bun
+      - name: Check if bun version is up to date
+        run: |
+          LAYER_VERSION=$(grep 'version:' version.yml | awk '{print $2}')
+          LATEST_BUN_VERSION=$(echo ${{ steps.bun_latest_version.outputs.latest_tag_name }} | sed 's/bun-v//')
+          if [ "$LAYER_VERSION" = "$LATEST_BUN_VERSION" ]; then
+            echo "Bun lambda layer version is up to date"
+            exit 1
+          fi
+      - name: Update layer version
+        run: |
+          LAYER_VERSION=$(grep 'version:' version.yml | awk '{print $2}')
+          LATEST_BUN_VERSION=$(echo ${{ steps.bun_latest_version.outputs.latest_tag_name }} | sed 's/bun-v//')
+          sed -i "s/version: $LAYER_VERSION/version: $LATEST_BUN_VERSION/" version.yml
+      - uses: EndBug/add-and-commit@v9
+        with:
+          message: 'Autoupdate to version ${{ steps.bun_latest_version.outputs.latest_tag_name }}'
