@@ -20,6 +20,7 @@ jobs:
           owner: oven-sh
           repo: bun
       - name: Check if bun version is up to date
+        id: check_bun_version
         run: |
           LAYER_VERSION=$(grep 'version:' version.yml | awk '{print $2}')
           LATEST_BUN_VERSION=$(echo ${{ steps.bun_latest_version.outputs.latest_tag }} | sed 's/bun-v//')
@@ -27,26 +28,32 @@ jobs:
           echo "LAYER_VERSION=$LAYER_VERSION" >> $GITHUB_ENV
           if [ "$LAYER_VERSION" = "$LATEST_BUN_VERSION" ]; then
             echo "Bun lambda layer version is up to date"
-            exit 0
+            echo "skipBuild=true" >> $GITHUB_OUTPUT
           fi
       - name: Update layer version
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         run: |
           sed -i "s/version: $LAYER_VERSION/version: $LATEST_BUN_VERSION/" version.yml
       - uses: EndBug/add-and-commit@v9
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         with:
           message: 'Autoupdate to version ${{ steps.bun_latest_version.outputs.latest_tag }}'
       - name: Install bun
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         run: |
           curl -fsSL https://bun.sh/install | bash -s -- bun-v$LATEST_BUN_VERSION
       - name: Clone bun
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         run: git clone -b bun-v$LATEST_BUN_VERSION --depth 1 https://github.com/oven-sh/bun.git ./bun
       - name: Build layer
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         run: |
           export PATH=~/.bun/bin:$PATH
           cd bun/packages/bun-lambda
           bun install
           bun run build-layer --output bun-lambda-layer-${LATEST_BUN_VERSION}.zip
       - name: Create release
+        if: steps.check_bun_version.outputs.skipBuild != 'true'
         run: gh release create "v$LATEST_BUN_VERSION" bun/packages/bun-lambda/bun-lambda-layer-${LATEST_BUN_VERSION}.zip --title "Release $LATEST_BUN_VERSION" --notes "Lambda layer using bun-v$LATEST_BUN_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
