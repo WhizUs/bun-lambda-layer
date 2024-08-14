@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-bun-version:
+  check-and-build-bun-version:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,47 +23,30 @@ jobs:
         run: |
           LAYER_VERSION=$(grep 'version:' version.yml | awk '{print $2}')
           LATEST_BUN_VERSION=$(echo ${{ steps.bun_latest_version.outputs.latest_tag }} | sed 's/bun-v//')
+          echo "LATEST_BUN_VERSION=$LATEST_BUN_VERSION" >> $GITHUB_ENV
+          echo "LAYER_VERSION=$LAYER_VERSION" >> $GITHUB_ENV
           if [ "$LAYER_VERSION" = "$LATEST_BUN_VERSION" ]; then
             echo "Bun lambda layer version is up to date"
             exit 0
           fi
       - name: Update layer version
         run: |
-          LAYER_VERSION=$(grep 'version:' version.yml | awk '{print $2}')
-          echo "Current version: $LAYER_VERSION"
-          LATEST_BUN_VERSION=$(echo ${{ steps.bun_latest_version.outputs.latest_tag }} | sed 's/bun-v//')
-          echo "Update to latest version: $LATEST_BUN_VERSION"
           sed -i "s/version: $LAYER_VERSION/version: $LATEST_BUN_VERSION/" version.yml
       - uses: EndBug/add-and-commit@v9
         with:
           message: 'Autoupdate to version ${{ steps.bun_latest_version.outputs.latest_tag }}'
-  build-bun-lambda-layer:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Read bun version
-        run: |
-          VERSION=$(grep 'version:' version.yml | awk '{print $2}')
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
       - name: Install bun
         run: |
-          curl -fsSL https://bun.sh/install | bash -s -- bun-v$VERSION
-
+          curl -fsSL https://bun.sh/install | bash -s -- bun-v$LATEST_BUN_VERSION
       - name: Clone bun
-        run: git clone -b bun-v$VERSION --depth 1 https://github.com/oven-sh/bun.git ./bun
-
+        run: git clone -b bun-v$LATEST_BUN_VERSION --depth 1 https://github.com/oven-sh/bun.git ./bun
       - name: Build layer
         run: |
           export PATH=~/.bun/bin:$PATH
           cd bun/packages/bun-lambda
           bun install
-          bun run build-layer --output bun-lambda-layer-${VERSION}.zip
-
+          bun run build-layer --output bun-lambda-layer-${LATEST_BUN_VERSION}.zip
       - name: Create release
-        run: gh release create "v$VERSION" bun/packages/bun-lambda/bun-lambda-layer-${VERSION}.zip --title "Release $VERSION" --notes "Lambda layer using bun-v$VERSION"
+        run: gh release create "v$LATEST_BUN_VERSION" bun/packages/bun-lambda/bun-lambda-layer-${LATEST_BUN_VERSION}.zip --title "Release $LATEST_BUN_VERSION" --notes "Lambda layer using bun-v$LATEST_BUN_VERSION"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
