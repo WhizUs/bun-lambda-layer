@@ -1,4 +1,4 @@
-name: Build Bun Lambda Layer
+name: Check new Bun version
 
 on:
   schedule:
