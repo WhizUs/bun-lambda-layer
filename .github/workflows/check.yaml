@@ -2,7 +2,7 @@ name: Check new Bun version
 
 on:
   schedule:
-    - cron: "30 8,20 * * *"
+    - cron: "45 6,18 * * *"
 
 jobs:
   build-bun-lambda-layer:
